@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>MeMori Fácil – Gerador de Memorial Descritivo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Um aplicativo web para gerar memoriais descritivos de serviços de manutenção predial, alinhado à Lei 14.133/21 e referências CDHU/CPOS/FDE.">
+    
+    <!-- Estilos CSS -->
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --primary-hover: #1D4ED8;
+            --background-color: #F7F8FA;
+            --card-background: #FFFFFF;
+            --text-color: #1F2937;
+            --label-color: #374151;
+            --border-color: #E5E7EB;
+            --disabled-opacity: 0.6;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        header strong {
+            font-size: 1.5rem;
+        }
+        main {
+            max-width: 980px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        label, .label-group {
+            display: block;
+            margin: 0.75rem 0 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--label-color);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background-color: #F9FAFB;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checkbox-group input {
+            width: auto;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+        .btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+        .btn:disabled {
+            opacity: var(--disabled-opacity);
+            cursor: not-allowed;
+        }
+        .actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            background-color: #F9FAFB;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .footer-note {
+            font-size: 0.8rem;
+            color: #6B7280;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .footer-note a {
+            color: var(--primary-color);
+        }
+        #checklist {
+            list-style-type: none;
+            padding: 0;
+        }
+        #checklist li {
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        .checklist-error {
+            background-color: #FEF2F2;
+            color: #991B1B;
+            border-left: 4px solid #EF4444;
+        }
+        .checklist-ok {
+            background-color: #F0FDF4;
+            color: #166534;
+            border-left: 4px solid #22C55E;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        th {
+            background-color: #F3F4F6;
+            font-weight: 600;
+        }
+    </style>
+    
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://rsms.me" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+</head>
+<body>
+    <header>
+        <strong>MeMori Fácil</strong>
+        <p style="margin: 0.25rem 0 0; font-weight: 300;">Gerador de Memorial Descritivo Guiado</p>
+    </header>
+
+    <main>
+        <!-- Card 1: Dados do Documento -->
+        <div class="card">
+            <h2>1. Dados do Documento</h2>
+            <div class="row">
+                <div>
+                    <label for="titulo">Título do Memorial*</label>
+                    <input id="titulo" placeholder="Ex.: Reforma Parcial do Edifício Sede" required />
+                </div>
+                <div>
+                    <label for="local">Local/Endereço da Obra*</label>
+                    <input id="local" placeholder="Ex.: Av. Exemplo, 123 – Centro" required />
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="unidade">Unidade/Setor</label>
+                    <input id="unidade" placeholder="Ex.: Secretaria Y / Bloco A" />
+                </div>
+                <div>
+                    <label for="rt">Responsável Técnico (Nome/CREA/CAU)*</label>
+                    <input id="rt" placeholder="Ex.: Eng. Fulano de Tal, CREA-SP 000000" required />
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Seleção do Serviço -->
+        <div class="card">
+            <h2>2. Seleção do Serviço Principal</h2>
+            <label for="servico">Escolha o serviço para detalhar*</label>
+            <select id="servico" required>
+                <option value="">— Escolha uma opção —</option>
+                <option value="servicos_preliminares">Serviços Preliminares</option>
+                <option value="demolicoes">Demolições e Retiradas</option>
+                <option value="pintura_interna">Pintura Interna</option>
+                <option value="pintura_externa">Pintura Externa</option>
+                <option value="piso_ceramico">Troca de Piso Cerâmico/Porcelanato</option>
+                <option value="piso_vinilico">Troca de Piso Vinílico</option>
+                <option value="forro">Troca de Forro (Drywall/Modular)</option>
+                <option value="eletrica">Manutenção Básica de Elétrica</option>
+                <option value="hidraulica">Manutenção Básica de Hidráulica</option>
+                <option value="telhado">Manutenção de Telhado</option>
+            </select>
+        </div>
+
+        <!-- Card 3: Parâmetros do Serviço (Conteúdo dinâmico) -->
+        <div class="card" id="params-container" style="display: none;">
+            <h2 id="params-title">3. Parâmetros do Serviço</h2>
+            <div id="params-content"></div>
+        </div>
+        
+        <!-- Card 4: Validação e Ações -->
+        <div class="card">
+            <h2>4. Validação e Ações</h2>
+            <div id="checklist-container" style="display: none;">
+                <ul id="checklist"></ul>
+            </div>
+            <div class="actions">
+                <button class="btn" id="gerar" disabled>Gerar Memorial</button>
+                <button class="btn" id="copiar" disabled>Copiar Texto do Memorial</button>
+            </div>
+        </div>
+
+        <!-- Card 5: Pré-visualização do Memorial -->
+        <div class="card" id="preview-container" style="display: none;">
+            <h2>Pré-visualização do Memorial Descritivo</h2>
+            <pre id="preview"></pre>
+        </div>
+
+        <!-- Card 6: Orçamento Referencial -->
+        <div class="card" id="orcamento-container" style="display: none;">
+            <h2>Orçamento Referencial (Exemplo)</h2>
+            <p>A tabela abaixo é um exemplo simplificado. Os códigos e custos devem ser validados com o boletim vigente (CDHU/SINAPI/etc.).</p>
+            <div id="orcamento-table"></div>
+        </div>
+    </main>
+
+    <footer class="footer-note">
+        <p>Desenvolvido como um protótipo para auxiliar na elaboração de documentos técnicos.</p>
+        <p>Tipografia: <a href="https://rsms.me/inter/" target="_blank">Inter</a> por Rasmus Andersson, recomendada por <a href="https://protocol.mozilla.org/docs/fundamentals/typography" target="_blank">Mozilla Protocol</a>.</p>
+    </footer>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Seleção dos elementos do DOM
+            const servicoEl = document.getElementById('servico');
+            const paramsContainer = document.getElementById('params-container');
+            const paramsContent = document.getElementById('params-content');
+            const paramsTitle = document.getElementById('params-title');
+            const gerarBtn = document.getElementById('gerar');
+            const copiarBtn = document.getElementById('copiar');
+            const previewContainer = document.getElementById('preview-container');
+            const previewEl = document.getElementById('preview');
+            const orcamentoContainer = document.getElementById('orcamento-container');
+            const orcamentoTable = document.getElementById('orcamento-table');
+            const checklistContainer = document.getElementById('checklist-container');
+            const checklistEl = document.getElementById('checklist');
+
+            // Inputs que precisam de validação
+            const requiredInputs = document.querySelectorAll('#titulo, #local, #rt, #servico');
+
+            // Objeto com o HTML dos formulários de parâmetros para cada serviço
+            const htmlParams = {
+                servicos_preliminares: `
+                    <div class="row">
+                        <div class="checkbox-group"><input type="checkbox" id="placa_obra" checked /><label for="placa_obra">Placa de Obra (Ref. CDHU 02.08.020)</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="instalacoes_provisorias" checked /><label for="instalacoes_provisorias">Instalações Provisórias (escritório, sanitários)</label></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="tapumes_m">Tapumes (metros lineares)</label><input id="tapumes_m" type="number" min="0" step="1" placeholder="Ex: 50" /></div>
+                        <div><label for="ligacoes_provisorias">Ligações Provisórias</label><select id="ligacoes_provisorias"><option value="agua_energia">Água e Energia</option><option value="apenas_agua">Apenas Água</option><option value="apenas_energia">Apenas Energia</option><option value="nenhuma">Nenhuma</option></select></div>
+                    </div>
+                     <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Incluir sinalização de segurança e contêiner para resíduos Classe A (Ref. CDHU 05.07.040)."></textarea></div>
+                `,
+                demolicoes: `
+                    <div class="row">
+                        <div><label for="tipo_demolicao">Tipo de Demolição/Retirada</label>
+                            <select id="tipo_demolicao">
+                                <option value="alvenaria">Alvenaria de vedação</option>
+                                <option value="revestimento_ceramico">Revestimento cerâmico de piso/parede</option>
+                                <option value="forro">Forro (gesso, madeira, etc.)</option>
+                                <option value="estrutura_madeira_telhado">Estrutura de madeira de telhado</option>
+                            </select>
+                        </div>
+                        <div><label for="area_demolicao">Área (m²) ou Volume (m³)</label><input id="area_demolicao" type="number" min="0" step="0.01" required /></div>
+                    </div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Retirada de entulho ensacado e remoção por caçamba."></textarea></div>
+                `,
+                pintura_interna: `
+                    <div class="row">
+                        <div><label for="area">Área total (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="tipo_massa">Aplicação de Massa</label><select id="tipo_massa"><option value="nao">Sem emassamento</option><option value="pva">Massa Corrida PVA</option><option value="acrilica">Massa Acrílica</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="tinta">Tipo de tinta</label><select id="tinta"><option value="latex_pva">Látex PVA (áreas secas)</option><option value="acrilica">Acrílica (maior lavabilidade)</option><option value="epoxi">Epóxi (alta resistência)</option></select></div>
+                        <div><label for="acab">Acabamento</label><select id="acab"><option value="fosco">Fosco</option><option value="acetinado">Acetinado</option><option value="semibrilho">Semibrilho</option></select></div>
+                    </div>
+                    <div class="checkbox-group"><input type="checkbox" id="fundo_selador" checked /><label for="fundo_selador">Incluir Fundo Selador Acrílico?</label></div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Incluir tratamento de fissuras. As superfícies deverão ser lixadas e limpas antes da pintura."></textarea></div>
+                `,
+                pintura_externa: `
+                    <div class="row">
+                        <div><label for="area">Área total (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="alt">Necessidade de Andaimes (trabalho em altura > 2m)?</label><select id="alt"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="tinta">Tipo de tinta</label><select id="tinta"><option value="acrilica_premium">Acrílica Premium (Elastômerica/Emborrachada)</option><option value="acrilica_standard">Acrílica Standard</option></select></div>
+                        <div><label for="cor">Cor</label><input id="cor" placeholder="Ex.: Areia" /></div>
+                    </div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Necessidade de tratamento de umidade e lavagem prévia da fachada."></textarea></div>
+                `,
+                piso_ceramico: `
+                    <div class="row">
+                        <div><label for="area">Área de piso (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="tipo">Tipo</label><select id="tipo"><option value="ceramico">Cerâmico</option><option value="porcelanato">Porcelanato</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="pei">Resistência à Abrasão (PEI)</label><select id="pei"><option value="3">PEI 3 (Tráfego Moderado)</option><option value="4">PEI 4 (Tráfego Intenso)</option><option value="5">PEI 5 (Tráfego Muito Intenso)</option></select></div>
+                        <div><label for="argamassa">Argamassa Colante</label><select id="argamassa"><option value="AC-I">AC-I (Área Interna Seca)</option><option value="AC-II">AC-II (Área Interna Molhada)</option><option value="AC-III">AC-III (Área Externa / Piscina)</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="rod">Rodapé (m lineares)</label><input id="rod" type="number" min="0" step="0.01" /></div>
+                        <div><label for="rejunte">Tipo de Rejunte</label><select id="rejunte"><option value="cimenticio">Cimentício</option><option value="acrilico">Acrílico</option><option value="epoxi">Epóxi</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div class="checkbox-group"><input type="checkbox" id="contrapiso" /><label for="contrapiso">Executar nova regularização/contrapiso?</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="imper" /><label for="imper">Executar impermeabilização?</label></div>
+                    </div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Incluir demolição do piso e contrapiso existentes."></textarea></div>
+                `,
+                piso_vinilico: `
+                    <div class="row">
+                        <div><label for="area">Área (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="tipo">Tipo</label><select id="tipo"><option value="manta">Manta</option><option value="placa_lvt">Placa/Régua (LVT)</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="espessura_total">Espessura Total (mm)</label><input id="espessura_total" type="number" min="2" step="0.5" placeholder="Ex: 3.0" /></div>
+                        <div><label for="capa_uso">Capa de Uso (mm)</label><input id="capa_uso" type="number" min="0.1" step="0.1" placeholder="Ex: 0.5 (Uso Comercial)" /></div>
+                    </div>
+                    <div><label for="auto">Necessidade de massa autonivelante?</label><select id="auto"><option value="sim">Sim (base irregular)</option><option value="nao">Não (base regular)</option></select></div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: A base deverá estar perfeitamente limpa, seca e curada."></textarea></div>
+                `,
+                forro: `
+                    <div class="row">
+                        <div><label for="area">Área (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="tipo">Tipo</label><select id="tipo"><option value="drywall_st">Drywall ST (Standard)</option><option value="drywall_ru">Drywall RU (Resistente à Umidade)</option><option value="drywall_rf">Drywall RF (Resistente ao Fogo)</option><option value="fibra_mineral">Modular – Fibra Mineral (Acústico)</option><option value="pvc">Modular – PVC</option></select></div>
+                    </div>
+                    <div class="checkbox-group"><input type="checkbox" id="isolamento" /><label for="isolamento">Incluir isolamento termoacústico (lã de vidro/rocha)?</label></div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Incluir demolição do forro existente. Prever tratamento de juntas e preparação para pintura."></textarea></div>
+                `,
+                eletrica: `
+                    <div class="row">
+                        <div><label for="t10">Tomadas 10 A (un)</label><input id="t10" type="number" min="0" step="1" /></div>
+                        <div><label for="t20">Tomadas 20 A (un)</label><input id="t20" type="number" min="0" step="1" /></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="int">Interruptores/Conjuntos (un)</label><input id="int" type="number" min="0" step="1" /></div>
+                        <div><label for="lum">Pontos de Luz/Luminárias (un)</label><input id="lum" type="number" min="0" step="1" /></div>
+                    </div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Tensão 127V. Todos os materiais devem ter certificação INMETRO."></textarea></div>
+                `,
+                hidraulica: `
+                    <div class="row">
+                        <div><label for="tor">Torneiras (un)</label><input id="tor" type="number" min="0" step="1" /></div>
+                        <div><label for="reg">Registros (un)</label><input id="reg" type="number" min="0" step="1" /></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="sif">Sifões (un)</label><input id="sif" type="number" min="0" step="1" /></div>
+                        <div><label for="agua">Tubulação Água (m total)</label><input id="agua" type="number" min="0" step="0.1" /></div>
+                    </div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Realizar teste de estanqueidade após a conclusão dos reparos."></textarea></div>
+                `,
+                telhado: `
+                    <div class="row">
+                        <div><label for="area">Área de telhamento (m²)*</label><input id="area" type="number" min="0" step="0.01" required /></div>
+                        <div><label for="mat">Material da Telha</label><select id="mat"><option value="ceramica">Cerâmica</option><option value="fibrocimento">Fibrocimento (sem amianto)</option><option value="concreto">Concreto</option><option value="metalica">Metálica</option></select></div>
+                    </div>
+                    <div class="row">
+                        <div><label for="cum">Cumeeira (m)</label><input id="cum" type="number" min="0" step="0.1" /></div>
+                        <div><label for="calha">Calhas/Rufos (m)</label><input id="calha" type="number" min="0" step="0.1" /></div>
+                    </div>
+                    <div class="checkbox-group"><input type="checkbox" id="estrutura_madeira" /><label for="estrutura_madeira">Incluir reparos na estrutura de madeira?</label></div>
+                    <div><label for="obs">Observações</label><textarea id="obs" rows="3" placeholder="Ex.: Incluir desobstrução de calhas e condutores. Atender à NR-35 para trabalho em altura."></textarea></div>
+                `
+            };
+
+            // Função de validação dos campos
+            const validarCampos = () => {
+                let isValid = true;
+                checklistEl.innerHTML = '';
+                
+                const check = (condition, message) => {
+                    const li = document.createElement('li');
+                    li.textContent = message;
+                    if (condition) {
+                        li.className = 'checklist-ok';
+                    } else {
+                        li.className = 'checklist-error';
+                        isValid = false;
+                    }
+                    checklistEl.appendChild(li);
+                };
+
+                check(document.getElementById('titulo').value.trim() !== '', 'Título do memorial preenchido.');
+                check(document.getElementById('local').value.trim() !== '', 'Local da obra preenchido.');
+                check(document.getElementById('rt').value.trim() !== '', 'Responsável técnico preenchido.');
+                check(servicoEl.value !== '', 'Tipo de serviço selecionado.');
+
+                if (servicoEl.value) {
+                    const requiredParam = paramsContent.querySelector('[required]');
+                    if (requiredParam && requiredParam.value.trim() === '') {
+                         check(false, `Parâmetro obrigatório '${requiredParam.labels[0].textContent}' precisa ser preenchido.`);
+                    }
+                }
+                
+                checklistContainer.style.display = 'block';
+                return isValid;
+            };
+
+            // Adiciona listeners para revalidar ao digitar
+            document.querySelector('main').addEventListener('input', () => {
+                const servicoSelecionado = servicoEl.value !== '';
+                const dadosBasicosPreenchidos = [...requiredInputs].every(el => el.value.trim() !== '');
+                gerarBtn.disabled = !(servicoSelecionado && dadosBasicosPreenchidos);
+            });
+
+            // Event listener para mudança no seletor de serviço
+            servicoEl.addEventListener('change', () => {
+                const servico = servicoEl.value;
+                if (servico) {
+                    paramsTitle.textContent = `3. Parâmetros – ${servicoEl.options[servicoEl.selectedIndex].text}`;
+                    paramsContent.innerHTML = htmlParams[servico];
+                    paramsContainer.style.display = 'block';
+                } else {
+                    paramsContainer.style.display = 'none';
+                    paramsContent.innerHTML = '';
+                }
+                // Revalida os campos ao mudar o serviço
+                gerarBtn.disabled = !([...requiredInputs].every(el => el.value.trim() !== ''));
+                copiarBtn.disabled = true;
+                previewContainer.style.display = 'none';
+                orcamentoContainer.style.display = 'none';
+            });
+
+            // Função para gerar o texto do memorial
+            const gerarTextoMemorial = (data) => {
+                const hoje = new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' });
+                return `
+MEMORIAL DESCRITIVO – ${data.titulo}
+==================================================
+
+1. OBJETO
+   - Objeto: ${data.servico_nome}
+   - Local: ${data.local}
+   - Unidade/Setor: ${data.unidade || 'Não informado'}
+   - Responsável Técnico pela Elaboração: ${data.rt}
+   - Data de Emissão: ${hoje}
+
+2. CONSIDERAÇÕES GERAIS
+   A CONTRATADA deverá fornecer todos os materiais, mão de obra, ferramentas e equipamentos necessários para a perfeita execução dos serviços, seguindo fielmente as especificações deste memorial. Deverá providenciar a Anotação de Responsabilidade Técnica (ART) ou Registro de Responsabilidade Técnica (RRT) antes do início dos trabalhos. A limpeza diária do local e a destinação ambientalmente adequada de resíduos (conforme Resolução CONAMA 307/2002) são de sua responsabilidade. Todos os materiais devem ser de primeira linha e possuir certificações aplicáveis, com amostras submetidas à aprovação da Fiscalização.
+
+3. NORMAS E LEGISLAÇÃO (Rol não exaustivo)
+   - Lei Federal nº 14.133/2021 (Nova Lei de Licitações e Contratos).
+   - Normas da ABNT aplicáveis, incluindo: ${data.normas}.
+   - Normas Regulamentadoras (NRs) do MTE, em especial NR-10 (Elétrica), NR-18 (Construção Civil) e NR-35 (Trabalho em Altura), quando aplicável.
+   - Recomendações técnicas dos fabricantes dos materiais especificados.
+
+4. ESCOPO DETALHADO E ESPECIFICAÇÕES TÉCNICAS
+   ${data.escopo}
+
+5. CRITÉRIOS DE MEDIÇÃO E PAGAMENTO
+   ${data.medicao} O pagamento será realizado após a medição dos serviços efetivamente executados e o aceite da Fiscalização.
+
+6. SEGURANÇA, SAÚDE E MEIO AMBIENTE (SSMA)
+   É obrigatório o uso de todos os Equipamentos de Proteção Individual (EPIs) e Coletiva (EPCs) necessários. A área de trabalho deverá ser devidamente isolada e sinalizada. A gestão de resíduos deverá seguir o Plano de Gerenciamento de Resíduos da Construção Civil (PGRCC) da contratada.
+
+7. GARANTIA
+   A CONTRATADA deverá oferecer garantia mínima de execução e materiais conforme a natureza do serviço e o Código Civil, sendo: 12 (doze) meses para pinturas e 5 (cinco) anos para revestimentos e instalações, salvo prazos legais específicos ou definidos pelo órgão contratante.
+
+8. DISPOSIÇÕES FINAIS
+   Este memorial descritivo prevalece sobre quaisquer descrições genéricas em planilhas ou propostas. Casos omissos serão dirimidos pela Fiscalização do contrato, com base nas melhores práticas de engenharia e na legislação vigente.
+
+--- Fim do Documento ---
+                `.trim();
+            };
+
+            // Funções auxiliares para gerar partes do texto
+            const gerarEscopo = (s) => {
+                switch (s.tipo) {
+                    case 'servicos_preliminares': return `Este item abrange os trabalhos necessários para o início seguro e organizado da obra. Inclui: ${s.placa_obra ? 'instalação de placa de obra conforme padrões (Ref. CDHU 02.08.020);' : ''} ${s.tapumes_m ? `fechamento do canteiro com ${s.tapumes_m}m de tapumes;` : ''} ${s.instalacoes_provisorias ? 'montagem de instalações provisórias (escritório, almoxarifado, vestiários, sanitários);' : ''} ${s.ligacoes_provisorias !== 'nenhuma' ? `execução de ligações provisórias de ${s.ligacoes_provisorias.replace('_', ' e ')};` : ''} sinalização de segurança e organização do canteiro. Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'demolicoes': return `Demolição manual de ${s.tipo_demolicao} em aproximadamente ${s.area_demolicao} ${s.tipo_demolicao === 'alvenaria' ? 'm³' : 'm²'}. O serviço inclui a remoção cuidadosa dos materiais, proteção de áreas adjacentes, ensacamento do entulho e sua remoção para descarte em local licenciado (bota-fora ou caçamba). Referências CDHU: 03.02.040 (Alvenaria), 03.04.020 (Revestimento Cerâmico), 03.08.040 (Forro). Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'pintura_interna': return `Pintura interna em área total de ${s.area || '[ÁREA]'} m². O serviço inclui: preparo completo da superfície conforme ABNT NBR 13245 (lixamento, limpeza e remoção de pó). ${s.tipo_massa !== 'nao' ? `Aplicação de ${s.tipo_massa === 'pva' ? 'Massa Corrida PVA' : 'Massa Acrílica'} para correção de imperfeições (Ref. CPOS 33.02.080).` : ''} ${s.fundo_selador ? 'Aplicação de uma demão de Fundo Selador Acrílico.' : ''} Aplicação de, no mínimo, duas demãos de tinta ${s.tinta} com acabamento ${s.acab}, cor ${s.cor || '[COR]'}, até a perfeita cobertura da superfície. Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'pintura_externa': return `Pintura externa em área de ${s.area || '[ÁREA]'} m². Inclui: tratamento de patologias, lavagem, aplicação de fundo preparador ou selador acrílico, e pintura com tinta ${s.tinta} de alta resistência a intempéries, cor ${s.cor || '[COR]'}. ${s.alt === 'sim' ? 'Deverá ser previsto o uso de andaimes tubulares ou plataforma elevatória, montados conforme NR-18 e NR-35 (Ref. CDHU 02.05.212).' : ''} Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'piso_ceramico': return `Troca de piso (${s.tipo}) em ${s.area || '[ÁREA]'} m². O escopo contempla: demolição e remoção do piso e contrapiso existentes (Ref. CDHU 03.04.020). ${s.contrapiso === 'sim' ? 'Execução de novo contrapiso com argamassa para regularização (Ref. CDHU 17.01.060).' : ''} ${s.imper === 'sim' ? 'Aplicação de impermeabilização com argamassa polimérica (Ref. CDHU 32.16.010).' : ''} Assentamento de piso ${s.tipo} (PEI ${s.pei}) com argamassa colante do tipo ${s.argamassa} e rejuntamento com rejunte do tipo ${s.rejunte}. Execução de ${s.rod || 0} m de rodapé. Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'piso_vinilico': return `Instalação de piso vinílico (${s.tipo}) em ${s.area || '[ÁREA]'} m². O serviço inclui: preparação rigorosa da base. ${s.auto === 'sim' ? 'Aplicação de massa autonivelante para garantir uma superfície perfeitamente lisa e regular.' : 'A base deverá estar perfeitamente regularizada.'} Assentamento com adesivo acrílico específico. Especificação do piso: espessura total ${s.espessura_total || '[ESPESSURA]'} mm, capa de uso ${s.capa_uso || '[CAPA DE USO]'} mm. Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'forro': return `Instalação de forro tipo ${s.tipo} em ${s.area || '[ÁREA]'} m². O serviço inclui: montagem da estrutura de sustentação em perfis metálicos galvanizados, instalação das chapas/placas, e tratamento de juntas/acabamento. ${s.isolamento ? 'Deverá ser instalado isolamento termoacústico com lã de vidro/rocha no entreforro.' : ''} Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'eletrica': return `Manutenção básica de instalações elétricas, incluindo a substituição de: ${s.t10 || 0} un de tomadas 10A, ${s.t20 || 0} un de tomadas 20A, ${s.int || 0} un de interruptores/conjuntos, e ${s.lum || 0} un de pontos de luz/luminárias. Todos os materiais devem possuir certificação INMETRO. Ref. CDHU: 40.04.450/460/480 (conjuntos), 41.14.790 (luminária). Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'hidraulica': return `Manutenção básica de instalações hidráulicas, incluindo a substituição de: ${s.tor || 0} un de torneiras, ${s.reg || 0} un de registros, ${s.sif || 0} un de sifões, e ${s.agua || 0} m de tubulação de água. A execução deve seguir a NBR 5626. Ref. CDHU/CPOS: 46.xx (tubos), 47.xx (registros), 44.xx (metais). Observações: ${s.obs || 'Nenhuma.'}`;
+                    case 'telhado': return `Manutenção de telhado em ${s.area || '[ÁREA]'} m². O escopo inclui: substituição de telhas danificadas (material: ${s.mat}), substituição de ${s.cum || 0} m de cumeeiras e ${s.calha || 0} m de calhas/rufos. ${s.estrutura_madeira ? 'Incluir reparos pontuais na estrutura de madeira de apoio (ripamento, caibros). (Ref. CDHU 15.01.220).' : ''} Inclui limpeza e desobstrução de todo o sistema de captação de águas pluviais. A execução deverá seguir a NR-35 para trabalho em altura. Observações: ${s.obs || 'Nenhuma.'}`;
+                    default: return '[ESCOPO DO SERVIÇO A SER DETALHADO]';
+                }
+            };
+
+            const medicaoTexto = (tipo) => {
+                switch (tipo) {
+                    case 'servicos_preliminares': return 'Medição por verba (VB) para o conjunto de serviços ou por unidade/metro para itens específicos, conforme planilha orçamentária.';
+                    case 'demolicoes': return 'Medição por metro quadrado (m²) ou metro cúbico (m³) de área/volume efetivamente demolido e removido.';
+                    case 'pintura_interna': case 'pintura_externa': return 'Medição por metro quadrado (m²) de superfície efetivamente pintada.';
+                    case 'piso_ceramico': return 'Medição por metro quadrado (m²) de piso assentado e por metro linear (m) de rodapé executado.';
+                    case 'piso_vinilico': case 'forro': return 'Medição por metro quadrado (m²) de forro/piso efetivamente instalado.';
+                    case 'eletrica': case 'hidraulica': return 'Medição por unidade (un) de cada item substituído e por metro (m) de tubulação instalada.';
+                    case 'telhado': return 'Medição por metro quadrado (m²) de área de telhado reparada e por metro linear (m) de calha/rufo/cumeeira substituído.';
+                    default: return '[CRITÉRIO DE MEDIÇÃO A SER DETALHADO]';
+                }
+            };
+            
+            const normasTexto = (tipo) => {
+                const base = "NBR 15575 (Desempenho)";
+                switch (tipo) {
+                    case 'servicos_preliminares': return 'NR-18 (Canteiro de Obras), Resolução CONAMA 307/2002 (Resíduos).';
+                    case 'demolicoes': return 'NBR 15112 (Gestão de Resíduos da Construção Civil).';
+                    case 'pintura_interna': case 'pintura_externa': return `${base}, NBR 13245 (Preparação de superfícies), NBR 11702 (Tintas).`;
+                    case 'piso_ceramico': return `${base}, NBR 13753/13755 (Assentamento), NBR 14081 (Argamassa Colante).`;
+                    case 'piso_vinilico': return `${base}, NBR 14917 (Pisos Vinílicos - Instalação e Requisitos).`;
+                    case 'forro': return `${base}, NBR 15758 (Sistemas Drywall), NBR 15217 (Perfis de Aço).`;
+                    case 'eletrica': return "NBR 5410 (Instalações elétricas de baixa tensão), NR-10.";
+                    case 'hidraulica': return "NBR 5626 (Instalações prediais de água fria), NBR 10844 (Águas pluviais).";
+                    case 'telhado': return `${base}, NR-35 (Trabalho em Altura).`;
+                    default: return base;
+                }
+            };
+
+            const gerarOrcamento = (s) => {
+                const orcamentos = {
+                    servicos_preliminares: [
+                        { cod: 'CDHU 01.01.010', desc: 'Placa de Obra', un: 'un', qtd: s.placa_obra ? 1 : 0 },
+                        { cod: 'CDHU 02.03.260', desc: 'Tapume em painel OSB', un: 'm', qtd: s.tapumes_m },
+                        { cod: 'CDHU 05.07.040', desc: 'Remoção de entulho com caçamba metálica', un: 'm³', qtd: s.obs.includes('contêiner') ? 1 : 0 }
+                    ],
+                    demolicoes: [
+                        { cod: {alvenaria: '03.02.040', revestimento_ceramico: '03.04.020', forro: '03.08.040', estrutura_madeira_telhado: '04.02.070'}[s.tipo_demolicao], desc: `Demolição/Retirada de ${s.tipo_demolicao}`, un: s.tipo_demolicao === 'alvenaria' ? 'm³' : 'm²', qtd: s.area_demolicao },
+                        { cod: '05.07.040', desc: 'Remoção de entulho com caçamba metálica', un: 'm³', qtd: s.area_demolicao ? (parseFloat(s.area_demolicao) / 10).toFixed(2) : 0 } // Estimativa
+                    ],
+                    pintura_interna: [
+                        { cod: '33.02.060', desc: `Aplicação de ${s.tipo_massa === 'pva' ? 'Massa Corrida PVA' : 'Massa Acrílica'}`, un: 'm²', qtd: s.tipo_massa !== 'nao' ? s.area : 0 },
+                        { cod: '33.01.050', desc: 'Aplicação de Fundo Selador', un: 'm²', qtd: s.fundo_selador ? s.area : 0 },
+                        { cod: '33.10.020', desc: `Pintura com tinta ${s.tinta} (2 demãos)`, un: 'm²', qtd: s.area }
+                    ],
+                    piso_ceramico: [
+                        { cod: '03.04.020', desc: 'Demolição de revestimento de piso existente', un: 'm²', qtd: s.area },
+                        { cod: '17.01.060', desc: 'Regularização de base com argamassa', un: 'm²', qtd: s.contrapiso ? s.area : 0 },
+                        { cod: '18.08.090', desc: `Assentamento de piso ${s.tipo} com argamassa ${s.argamassa}`, un: 'm²', qtd: s.area },
+                        { cod: '18.06.410', desc: `Rejuntamento com rejunte ${s.rejunte}`, un: 'm²', qtd: s.area },
+                        { cod: '18.08.072', desc: 'Execução de rodapé', un: 'm', qtd: s.rod }
+                    ]
+                };
+                const itens = orcamentos[s.tipo] || [{ cod: 'N/A', desc: 'Serviço sem orçamento pré-definido neste MVP.', un: '-', qtd: '-' }];
+                let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código Ref.</th>
+                                <th>Descrição do Serviço</th>
+                                <th>Unidade</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                itens.forEach(item => {
+                    if (item.qtd && parseFloat(item.qtd) > 0) {
+                        tableHTML += `
+                            <tr>
+                                <td>${item.cod}</td>
+                                <td>${item.desc}</td>
+                                <td>${item.un}</td>
+                                <td>${item.qtd}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                tableHTML += '</tbody></table>';
+                return tableHTML;
+            };
+
+            // Event listener para o botão de gerar
+            gerarBtn.addEventListener('click', () => {
+                if (!validarCampos()) {
+                    alert('Por favor, corrija os erros apontados no checklist antes de continuar.');
+                    return;
+                }
+
+                const getVal = id => (document.getElementById(id)?.value || '').trim();
+                const getChecked = id => document.getElementById(id)?.checked;
+                const s = { tipo: servicoEl.value };
+
+                // Coleta os dados dos formulários dinâmicos
+                const inputs = paramsContent.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    s[input.id] = input.type === 'checkbox' ? input.checked : input.value.trim();
+                });
+                
+                const data = {
+                    titulo: getVal('titulo'),
+                    local: getVal('local'),
+                    unidade: getVal('unidade'),
+                    rt: getVal('rt'),
+                    servico_nome: servicoEl.options[servicoEl.selectedIndex].text,
+                    escopo: gerarEscopo(s),
+                    medicao: medicaoTexto(s.tipo),
+                    normas: normasTexto(s.tipo)
+                };
+
+                const textoFinal = gerarTextoMemorial(data);
+                previewEl.textContent = textoFinal;
+                previewContainer.style.display = 'block';
+
+                const orcamentoHTML = gerarOrcamento(s);
+                orcamentoTable.innerHTML = orcamentoHTML;
+                orcamentoContainer.style.display = 'block';
+
+                copiarBtn.disabled = false;
+                
+                // Rola a tela para a pré-visualização
+                previewContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Event listener para o botão de copiar
+            copiarBtn.addEventListener('click', async () => {
+                if (previewEl.textContent) {
+                    try {
+                        await navigator.clipboard.writeText(previewEl.textContent);
+                        alert('Memorial Descritivo copiado para a área de transferência!');
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                        alert('Não foi possível copiar o texto. Verifique as permissões do seu navegador.');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
